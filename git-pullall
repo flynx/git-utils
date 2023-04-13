@@ -40,7 +40,7 @@ TARGET_PATH=${TARGET_PATH:=.}
 cd "$TARGET_PATH"
 
 if [ $RECURSIVE ] ; then
-	DIRS=($(find . -name .git))
+	DIRS=($(find . -name .git | sort))
 else
 	DIRS=(./*/.git)
 fi
