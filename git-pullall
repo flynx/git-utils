@@ -1,12 +1,70 @@
 #!/bin/bash
 
-for d in * ; do
-	# skip non-dirs...
-	! [ -d "$d/.git" ] && continue
-	
-	echo $d
-	cd "$d"
+while true ; do
+	case $1 in
+		-h|--help)
+			echo "Usage: $(basename "$0") [OPTIONS] [PATH]"
+			echo
+			echo "Options:"
+			echo "    -h --help       - print this message and exit"
+			echo "    -r --recursive  - pull directories recursively"
+			echo "    -l --list       - print found repositories and exit"
+			echo
+			exit
+			;;
+
+		-r|--recursive)
+			RECURSIVE=1
+			shift
+			continue
+			;;
+		-l|--list)
+			LIST=1
+			shift
+			continue
+			;;
+
+		-*|--*)
+			echo "Error: unknown option: \"$1\"" >&2
+			exit
+			;;
+		*)
+			TARGET_PATH=$1
+			break
+			;;
+	esac
+done
+
+
+TARGET_PATH=${TARGET_PATH:=.}
+cd "$TARGET_PATH"
+
+if [ $RECURSIVE ] ; then
+	DIRS=($(find . -name .git))
+else
+	DIRS=(./*/.git)
+fi
+
+# no matches...
+if [[ $DIRS =~ \* ]] ; then
+	echo "no repos found." >&2
+	exit 1
+fi
+
+
+# do the update...
+wd=$(pwd)
+for dir in ${DIRS[@]} ; do
+	dir=${dir%.git}
+	echo $dir
+	if [ $LIST ] ; then
+		continue
+	fi
+	cd "$dir"
 	git pull
-	cd ..
+	cd "$wd"
 	echo
 done
+
+
+# vim:set sw=4 ts=4 :
