@@ -5,6 +5,8 @@ while true ; do
 		-h|--help)
 			echo "Usage: $(basename "$0") [OPTIONS] [PATH]"
 			echo
+			echo "Pull all repositories in PATH."
+			echo
 			echo "Options:"
 			echo "    -h --help       - print this message and exit"
 			echo "    -r --recursive  - pull directories recursively"
