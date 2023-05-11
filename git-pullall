@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# config...
+#
+#FALLBACK_TO_PULL=yes
+#
+
+
 while true ; do
 	case $1 in
 		-h|--help)
@@ -38,6 +44,8 @@ while true ; do
 done
 
 
+FALLBACK_TO_PULL=${FALLBACK_TO_PULL:=yes}
+
 TARGET_PATH=${TARGET_PATH:=.}
 cd "$TARGET_PATH"
 
@@ -49,7 +57,7 @@ fi
 
 
 # inside a repo...
-if [ -d ./.git ] ; then
+if [ $FALLBACK_TO_PULL = "yes" ] && [ -d ./.git ] ; then
 	echo "running inside a repository, falling back to vanilla pull..."
 	git pull
 	exit 0
