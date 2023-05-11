@@ -47,6 +47,15 @@ else
 	DIRS=(./*/.git)
 fi
 
+
+# inside a repo...
+if [ -d ./.git ] ; then
+	echo "running inside a repository, falling back to vanilla pull..."
+	git pull
+	exit 0
+fi
+
+
 # no matches...
 if [[ $DIRS =~ \* ]] ; then
 	echo "no repos found." >&2
