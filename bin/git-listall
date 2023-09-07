@@ -5,7 +5,7 @@ while true ; do
 		-h|--help)
 			echo "Usage: $(basename "$0") [OPTIONS] [PATH]"
 			echo
-			echo "Pull all repositories in PATH."
+			echo "List all repositories in PATH."
 			echo
 			echo "Options:"
 			echo "    -h --help       - print this message and exit"
@@ -15,7 +15,7 @@ while true ; do
 			;;
 
 		-r|--recursive)
-			RECURSIVE=-r
+			RECURSIVE=1
 			shift
 			continue
 			;;
@@ -31,34 +31,27 @@ while true ; do
 	esac
 done
 
+
 TARGET_PATH=${TARGET_PATH:=.}
 cd "$TARGET_PATH"
 
-DIRS=($(git listall ${RECURSIVE}))
+if [ $RECURSIVE ] ; then
+	DIRS=($(find . -name .git | sort))
+else
+	DIRS=(./*/.git)
+fi
 
 # inside a repo...
 if [ -d ./.git ] ; then
-	git pull
+	echo .
 	exit 0
 fi
-
-
-# no matches...
-if [[ $DIRS =~ \* ]] ; then
-	echo "no repos found." >&2
-	exit 1
-fi
-
 
 # do the update...
 wd=$(pwd)
 for dir in ${DIRS[@]} ; do
 	dir=${dir%.git}
 	echo $dir
-	cd "$dir"
-	git pull
-	cd "$wd"
-	echo
 done
 
 

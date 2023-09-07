@@ -5,7 +5,7 @@ while true ; do
 		-h|--help)
 			echo "Usage: $(basename "$0") [OPTIONS] [PATH]"
 			echo
-			echo "Pull all repositories in PATH."
+			echo "Print origins of all repositories in PATH."
 			echo
 			echo "Options:"
 			echo "    -h --help       - print this message and exit"
@@ -36,9 +36,15 @@ cd "$TARGET_PATH"
 
 DIRS=($(git listall ${RECURSIVE}))
 
+getOrigin(){
+	cd "$1"
+	git ls-remote --get-url origin
+	cd "$wd"
+}
+
 # inside a repo...
 if [ -d ./.git ] ; then
-	git pull
+	echo ". `getOrigin .`"
 	exit 0
 fi
 
@@ -54,12 +60,13 @@ fi
 wd=$(pwd)
 for dir in ${DIRS[@]} ; do
 	dir=${dir%.git}
-	echo $dir
-	cd "$dir"
-	git pull
-	cd "$wd"
-	echo
+	echo "$dir `getOrigin "$dir"`"
 done
 
 
 # vim:set sw=4 ts=4 :
+
+
+
+
+

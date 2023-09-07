@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+
+while true ; do
+	case $1 in
+		-h|--help)
+			echo "Usage: $(basename "$0") [OPTIONS] FILE [PATH]"
+			echo
+			echo "Clone all repositories from lst (FILE)."
+			echo
+			echo "Options:"
+			echo "    -h --help       - print this message and exit"
+			echo
+			echo "Repository list can be constructed from an existing set of"
+			echo "repositories via:"
+			echo "  $ git remotes > reposiotry.lst"
+			echo "or recursively:"
+			echo "  $ git remotes -r > reposiotry.lst"
+			echo
+			echo "The repository list is a text file with each line consisting"
+			echo "of a space-separated path and a remote url (as supported by"
+			echo "git clone)."
+			echo "The list file can also contain empty lines and supports shell"
+			echo "comments (lines starting with \"#\")"
+			echo
+			exit
+			;;
+
+		-*|--*)
+			echo "Error: unknown option: \"$1\"" >&2
+			exit
+			;;
+		*)
+			LIST=$1
+			TARGET_PATH=$2
+			break
+			;;
+	esac
+done
+
+TARGET_PATH=${TARGET_PATH:=.}
+cd "$TARGET_PATH"
+
+if [ -z $LIST ] ; then
+	echo "need a list file..." >&2
+	exit 1
+fi
+
+IFS=$'\n' \
+	LIST=($(cat "$LIST"))
+
+wd=`pwd`
+for repo in ${LIST[@]} ; do
+	repo=`xargs<<<"${repo}"`
+	# skip comments and empty lines...
+	if [ -z "$repo" ] || [[ "${repo}" =~ ^# ]] ; then
+		continue
+	fi
+
+	IFS=$' ' \
+		repo=($repo)
+
+	# skip existing dirs...
+	if [ -e "${repo[0]}" ] ; then
+		#echo "skipping: ${repo[0]}"
+		continue
+	fi
+
+	mkdir -p "${repo[0]}"
+	cd "${repo[0]}"
+
+	git clone ${repo[1]} "${repo[0]}"
+
+	cd "$wd"
+done
+
+
+
+
+# vim:set sw=4 ts=4 :
+
+
+
+
+
