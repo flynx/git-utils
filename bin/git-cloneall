@@ -12,12 +12,12 @@ while true ; do
 			echo
 			echo "Repository list can be constructed from an existing set of"
 			echo "repositories via:"
-			echo "  $ git remotes > reposiotry.lst"
+			echo "  $ git listall -o > reposiotry.lst"
 			echo "or recursively:"
-			echo "  $ git remotes -r > reposiotry.lst"
+			echo "  $ git listall -o -r > reposiotry.lst"
 			echo
 			echo "The repository list is a text file with each line consisting"
-			echo "of a space-separated path and a remote url (as supported by"
+			echo "of a \"=\"-separated path and a remote url (as supported by"
 			echo "git clone)."
 			echo "The list file can also contain empty lines and supports shell"
 			echo "comments (lines starting with \"#\")"
@@ -56,11 +56,11 @@ for repo in ${LIST[@]} ; do
 		continue
 	fi
 
-	IFS=$' ' \
+	IFS=$'=' \
 		repo=($repo)
 
-	# skip existing dirs...
-	if [ -e "${repo[0]}" ] ; then
+	# skip existing dirs or local repos...
+	if [ -e "${repo[0]}" ] || [ "${repo[1]}" = "origin" ] ; then
 		#echo "skipping: ${repo[0]}"
 		continue
 	fi

@@ -9,13 +9,19 @@ while true ; do
 			echo
 			echo "Options:"
 			echo "    -h --help       - print this message and exit"
-			echo "    -r --recursive  - pull directories recursively"
+			echo "    -r --recursive  - list directories recursively"
+			echo "    -o --origin     - also print origin url"
 			echo
 			exit
 			;;
 
 		-r|--recursive)
 			RECURSIVE=1
+			shift
+			continue
+			;;
+		-o|--origin)
+			ORIGIN=1
 			shift
 			continue
 			;;
@@ -36,14 +42,25 @@ TARGET_PATH=${TARGET_PATH:=.}
 cd "$TARGET_PATH"
 
 if [ $RECURSIVE ] ; then
-	DIRS=($(find . -name .git | sort))
+	IFS=$'\n' \
+		DIRS=($(find . -name .git | sort))
 else
-	DIRS=(./*/.git)
+	IFS=$'\n' \
+		DIRS=(./*/.git)
 fi
+
+# XXX handle local repos...
+getOrigin(){
+	if ! [ -z $ORIGIN ] ; then
+		cd "$1"
+		echo "=`git ls-remote --get-url origin`"
+		cd "$wd"
+	fi
+}
 
 # inside a repo...
 if [ -d ./.git ] ; then
-	echo .
+	echo ".`getOrigin .`"
 	exit 0
 fi
 
@@ -51,7 +68,7 @@ fi
 wd=$(pwd)
 for dir in ${DIRS[@]} ; do
 	dir=${dir%.git}
-	echo $dir
+	echo "$dir`getOrigin "$dir"`"
 done
 
 
