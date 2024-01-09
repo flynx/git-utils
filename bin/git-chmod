@@ -13,6 +13,8 @@ while true ; do
 			echo "This is equivalent to:"
 			echo "  $ git update-index --chmod=MODE FILE ..."
 			echo
+			echo "This is useful in default configurations of git on Windows."
+			echo
 			exit
 			;;
 
