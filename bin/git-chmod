@@ -1,0 +1,43 @@
+#!/usr/bin/bash
+
+while true ; do
+	case $1 in
+		-h|--help)
+			echo "Usage: $(basename "$0") MODE FILE ..."
+			echo
+			echo "Change file mode on file(s)."
+			echo
+			echo "Options:"
+			echo "    -h --help       - print this message and exit"
+			echo
+			echo "This is equivalent to:"
+			echo "  $ git update-index --chmod=MODE FILE ..."
+			echo
+			exit
+			;;
+
+		-*|--*)
+			echo "Error: unknown option: \"$1\"" >&2
+			exit
+			;;
+		*)
+			break
+			;;
+	esac
+done
+
+if [[ $# < 2 ]] ; then
+	echo "Error need at least two arguments."
+	exit 1
+fi
+
+
+MODE=$1
+shift
+
+
+git update-index --chmod="$MODE" "$@"
+
+
+
+# vim:set sw=4 ts=4 :
