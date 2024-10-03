@@ -1,16 +1,29 @@
 #!/usr/bin/env bash
 
+shopt -s globstar
+
 while true ; do
 	case $1 in
 		-h|--help)
-			echo "Usage: $(basename "$0") [OPTIONS] [PATH]"
+			echo "Usage: $(basename "$0") [OPTIONS] [LIST]"
 			echo
-			echo "List all repositories in PATH."
+			echo "List all repositories in current directory."
 			echo
 			echo "Options:"
 			echo "    -h --help       - print this message and exit"
 			echo "    -r --recursive  - list directories recursively"
-			echo "    -o --origin     - also print origin url"
+			echo
+			echo "Repository list can be constructed from an existing set of repositories via:"
+			echo "  $ git listall > reposiotry.lst"
+			echo
+			echo "or recursively:"
+			echo "  $ git listall -r > reposiotry.lst"
+			echo
+			echo "If a repository list already exists it can be expanded via:"
+			echo "  $ git listall -r reposiotry.lst >> reposiotry.lst"
+			echo
+			echo "For info on list file format see:"
+			echo "    $ git-cloneall --help"
 			echo
 			exit
 			;;
@@ -20,56 +33,53 @@ while true ; do
 			shift
 			continue
 			;;
-		-o|--origin)
-			ORIGIN=1
-			shift
-			continue
-			;;
 
 		-*|--*)
 			echo "Error: unknown option: \"$1\"" >&2
 			exit
 			;;
 		*)
-			TARGET_PATH=$1
+			LIST=$1
+			#TARGET_PATH=$2
 			break
 			;;
 	esac
 done
 
-
 TARGET_PATH=${TARGET_PATH:=.}
 cd "$TARGET_PATH"
 
-if [ $RECURSIVE ] ; then
-	IFS=$'\n' \
-		DIRS=($(find . -name .git | sort))
+if ! [ -z $RECURSIVE ] ; then
+	REPOS=(./**/.git/config)
 else
-	IFS=$'\n' \
-		DIRS=(./*/.git)
+	REPOS=(./*/.git/config)
 fi
 
-# XXX handle local repos...
-getOrigin(){
-	if ! [ -z $ORIGIN ] ; then
-		cd "$1"
-		echo "=`git ls-remote --get-url origin`"
-		cd "$wd"
+# format and print unique lines...
+lines=()
+{
+	for p in "${REPOS[@]}" ; do
+		path=${p/.git\/config/}
+		remote=$(cat "$p" \
+			| sed -n '/\[remote "origin"\]/,/^\s*url/p' \
+			| grep 'url = ' \
+			| sed \
+				-e 's/\s*url\s*=\s*//')
+		[ -z $remote ] \
+			&& continue
+		line="$path=$remote"
+		lines+=($line)
+		echo $line
+	done
+	if [ -e "$LIST" ] ; then
+		cat "$LIST" \
+			| grep -ve '\(^\s*#\|^\s*$\)' \
+			| sed -e 's/^-//'
 	fi
-}
+} \
+	| sort \
+	| uniq -u
 
-# inside a repo...
-if [ -d ./.git ] ; then
-	echo ".`getOrigin .`"
-	exit 0
-fi
-
-# do the update...
-wd=$(pwd)
-for dir in ${DIRS[@]} ; do
-	dir=${dir%.git}
-	echo "$dir`getOrigin "$dir"`"
-done
 
 
 # vim:set sw=4 ts=4 :

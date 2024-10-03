@@ -5,48 +5,29 @@ shopt -s globstar
 while true ; do
 	case $1 in
 		-h|--help)
-			echo "Usage: $(basename "$0") [OPTIONS] FILE [PATH]"
+			echo "Usage: $(basename "$0") [OPTIONS] FILE"
 			echo
 			echo "Clone all repositories from lst (FILE)."
 			echo
 			echo "Options:"
 			echo "    -h --help       - print this message and exit"
-			echo "    -o              - print repos and exit"
-			echo "    -r              - print repos recursively and exit"
 			echo
-			echo "Repository list can be constructed from an existing set of"
-			echo "repositories via:"
-			echo "  $ git listall -o > reposiotry.lst"
-			echo "or recursively:"
-			echo "  $ git listall -r > reposiotry.lst"
-			echo "If a repository list already exists it can be expanded via:"
-			echo "  $ git listall -r reposiotry.lst >> reposiotry.lst"
+			echo "The repository list is a text file containing:"
+			echo " - Repository definition lines -- a \"=\"-separated path and a remote url"
+			echo "   Repository definitions starting with \"-\" will not get cloned"
+			echo " - Lines starting with \"#\" and empty lines are ignored"
 			echo
-			echo "The repository list is a text file with each line consisting"
-			echo "of a \"=\"-separated path and a remote url (as supported by"
-			echo "git clone)."
-			echo "Lines starting with \"-\" will not get cloned"
-			echo "The list file can also contain empty lines and supports shell"
-			echo "comments (lines starting with \"#\")"
 			echo "Example:"
 			echo "  # comment..."
 			echo "  ./path/to/repo=git@example.com:user/repo.git"
+			echo
 			echo "  # disabled repo..."
-			echo "  -./path/to/repo=git@example.com:user/repo.git"
+			echo "  -./path/to/other-repo=git@example.com:user/other-repo.git"
+			echo
+			echo "For info on constructing and updating repository lists see:"
+			echo "    $ git-listall --help"
 			echo
 			exit
-			;;
-
-		# list...
-		-o)
-			LIST_REPOS=1
-			shift
-			continue
-			;;
-		-r)
-			RECURSIVE=1
-			shift
-			continue
 			;;
 
 		-*|--*)
@@ -55,54 +36,12 @@ while true ; do
 			;;
 		*)
 			LIST=$1
-			TARGET_PATH=$2
+			#TARGET_PATH=$2
 			break
 			;;
 	esac
 done
 
-
-# list...
-#
-
-if ! [ -z $LIST_REPOS ] || ! [ -z $RECURSIVE ] ; then
-	if ! [ -z $RECURSIVE ] ; then
-		REPOS=(./**/.git/config)
-	else
-		REPOS=(./*/.git/config)
-	fi
-
-	# format and print unique lines...
-	lines=()
-	{
-		for p in "${REPOS[@]}" ; do
-			path=${p/.git\/config/}
-			remote=$(cat "$p" \
-				| sed -n '/\[remote "origin"\]/,/^\s*url/p' \
-				| grep 'url = ' \
-				| sed \
-					-e 's/\s*url\s*=\s*//')
-			[ -z $remote ] \
-				&& continue
-			line="$path=$remote"
-			lines+=($line)
-			echo $line
-		done
-		if [ -e "$LIST" ] ; then
-			cat "$LIST" \
-				| grep -ve '\(^\s*#\|^\s*$\)' \
-				| sed -e 's/^-//'
-		fi
-	} \
-		| sort \
-		| uniq -u
-
-	exit
-fi
-
-
-# clone...
-#
 
 TARGET_PATH=${TARGET_PATH:=.}
 cd "$TARGET_PATH"
