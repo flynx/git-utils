@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+shopt -s globstar
+
 while true ; do
 	case $1 in
 		-h|--help)
@@ -9,20 +11,42 @@ while true ; do
 			echo
 			echo "Options:"
 			echo "    -h --help       - print this message and exit"
+			echo "    -o              - print repos and exit"
+			echo "    -r              - print repos recursively and exit"
 			echo
 			echo "Repository list can be constructed from an existing set of"
 			echo "repositories via:"
 			echo "  $ git listall -o > reposiotry.lst"
 			echo "or recursively:"
-			echo "  $ git listall -o -r > reposiotry.lst"
+			echo "  $ git listall -r > reposiotry.lst"
+			echo "If a repository list already exists it can be expanded via:"
+			echo "  $ git listall -r reposiotry.lst >> reposiotry.lst"
 			echo
 			echo "The repository list is a text file with each line consisting"
 			echo "of a \"=\"-separated path and a remote url (as supported by"
 			echo "git clone)."
+			echo "Lines starting with \"-\" will not get cloned"
 			echo "The list file can also contain empty lines and supports shell"
 			echo "comments (lines starting with \"#\")"
+			echo "Example:"
+			echo "  # comment..."
+			echo "  ./path/to/repo=git@example.com:user/repo.git"
+			echo "  # disabled repo..."
+			echo "  -./path/to/repo=git@example.com:user/repo.git"
 			echo
 			exit
+			;;
+
+		# list...
+		-o)
+			LIST_REPOS=1
+			shift
+			continue
+			;;
+		-r)
+			RECURSIVE=1
+			shift
+			continue
 			;;
 
 		-*|--*)
@@ -36,6 +60,49 @@ while true ; do
 			;;
 	esac
 done
+
+
+# list...
+#
+
+if ! [ -z $LIST_REPOS ] || ! [ -z $RECURSIVE ] ; then
+	if ! [ -z $RECURSIVE ] ; then
+		REPOS=(./**/.git/config)
+	else
+		REPOS=(./*/.git/config)
+	fi
+
+	# format and print unique lines...
+	lines=()
+	{
+		for p in "${REPOS[@]}" ; do
+			path=${p/.git\/config/}
+			remote=$(cat "$p" \
+				| sed -n '/\[remote "origin"\]/,/^\s*url/p' \
+				| grep 'url = ' \
+				| sed \
+					-e 's/\s*url\s*=\s*//')
+			[ -z $remote ] \
+				&& continue
+			line="$path=$remote"
+			lines+=($line)
+			echo $line
+		done
+		if [ -e "$LIST" ] ; then
+			cat "$LIST" \
+				| grep -ve '\(^\s*#\|^\s*$\)' \
+				| sed -e 's/^-//'
+		fi
+	} \
+		| sort \
+		| uniq -u
+
+	exit
+fi
+
+
+# clone...
+#
 
 TARGET_PATH=${TARGET_PATH:=.}
 cd "$TARGET_PATH"
@@ -53,6 +120,11 @@ for repo in ${LIST[@]} ; do
 	repo=`xargs<<<"${repo}"`
 	# skip comments and empty lines...
 	if [ -z "$repo" ] || [[ "${repo}" =~ ^# ]] ; then
+		continue
+	fi
+
+	# skip lines startig with "-"...
+	if [[ "${repo:0:1}" == "-" ]] ; then
 		continue
 	fi
 
