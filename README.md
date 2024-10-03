@@ -15,6 +15,7 @@ Provided commands:
 These enable setting up and maintaining mutiple development machines with
 a number of git repositories.
 
+
 ## Workflow
 
 In a tree with multiple git repositories:
@@ -24,12 +25,21 @@ In a tree with multiple git repositories:
   ```
 - to create the same env on a different computer:
   ```shell
-  $ git listall -o -r > repos.lst
+  $ git listall -r > repos.lst
   ```
   move the `repos.lst` to the target machine and:
   ```shell
   $ git cloneall repos.lst
   ```
+- to update the repository list with new repos:
+  ```shell
+  $ git listall -r repos.lst >> repos.lst
+  ```
+
+
+## Tips
+- It is convenient to manage `repos.lst` as symlinks to a unified directory and
+  syncronize it between machines via someting like [syncthing](https://syncthing.net/)
 
 
 ## License
