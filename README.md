@@ -24,11 +24,15 @@ In a tree with multiple git repositories:
   ```
 - to create the same env on a different computer:
   ```shell
-  $ git listall -o -r > repos.lst
+  $ git listall -r > repos.lst
   ```
   move the `repos.lst` to the target machine and:
   ```shell
   $ git cloneall repos.lst
+  ```
+- to update the repository list with new repos:
+  ```shell
+  $ git listall -r repos.lst >> repos.lst
   ```
 
 
