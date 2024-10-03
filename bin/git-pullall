@@ -35,7 +35,7 @@ TARGET_PATH=${TARGET_PATH:=.}
 cd "$TARGET_PATH"
 
 IFS=$'\n'
-DIRS=($(git listall ${RECURSIVE}))
+DIRS=($(git listall -d ${RECURSIVE}))
 
 # inside a repo...
 if [ -d ./.git ] ; then

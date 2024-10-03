@@ -12,6 +12,7 @@ while true ; do
 			echo "Options:"
 			echo "    -h --help       - print this message and exit"
 			echo "    -r --recursive  - list directories recursively"
+			echo "    -d --dirs-only  - list directories only"
 			echo
 			echo "Repository list can be constructed from an existing set of repositories via:"
 			echo "  $ git listall > reposiotry.lst"
@@ -34,6 +35,12 @@ while true ; do
 			continue
 			;;
 
+		-d|--dirs-only)
+			DIRS_ONLY=1
+			shift
+			continue
+			;;
+
 		-*|--*)
 			echo "Error: unknown option: \"$1\"" >&2
 			exit
@@ -45,6 +52,17 @@ while true ; do
 			;;
 	esac
 done
+
+
+# prepare putput...
+prep(){
+	if ! [ -z $DIRS_ONLY ] ; then
+		sed -e 's/=.*//'
+	else
+		cat
+	fi
+}
+
 
 TARGET_PATH=${TARGET_PATH:=.}
 cd "$TARGET_PATH"
@@ -78,7 +96,8 @@ lines=()
 	fi
 } \
 	| sort \
-	| uniq -u
+	| uniq -u \
+	| prep
 
 
 
