@@ -49,7 +49,7 @@ TARGET_PATH=${TARGET_PATH:=.}
 cd "$TARGET_PATH"
 
 if [ -z $LIST ] ; then
-	if [ -e $DFL_LIST ] ; then
+	if ! [ -e $DFL_LIST ] ; then
 		echo "need a list file..." >&2
 		exit 1
 	fi
