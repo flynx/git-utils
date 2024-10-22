@@ -2,6 +2,8 @@
 
 shopt -s globstar
 
+DFL_LIST=repos.lst
+
 while true ; do
 	case $1 in
 		-h|--help)
@@ -47,8 +49,11 @@ TARGET_PATH=${TARGET_PATH:=.}
 cd "$TARGET_PATH"
 
 if [ -z $LIST ] ; then
-	echo "need a list file..." >&2
-	exit 1
+	if [ -e $DFL_LIST ] ; then
+		echo "need a list file..." >&2
+		exit 1
+	fi
+	LIST=$DFL_LIST
 fi
 
 IFS=$'\n' \
