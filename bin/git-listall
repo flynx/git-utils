@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+
 shopt -s globstar
 
 while true ; do
@@ -20,7 +21,7 @@ while true ; do
 			echo "or recursively:"
 			echo "  $ git listall -r > reposiotry.lst"
 			echo
-			echo "If a repository list already exists it can be expanded via:"
+			echo "If a repository list already exists it can be updated via:"
 			echo "  $ git listall -r reposiotry.lst >> reposiotry.lst"
 			echo
 			echo "For info on list file format see:"
@@ -38,6 +39,12 @@ while true ; do
 		-d|--dirs-only)
 			DIRS_ONLY=1
 			shift
+			continue
+			;;
+
+		-u|--update)
+			REPOS_FILE=$2
+			shift 2
 			continue
 			;;
 
@@ -73,6 +80,10 @@ else
 	REPOS=(./*/.git/config)
 fi
 
+if [ -e "$LIST" ] ; then
+	echo
+	echo "# $(date)"
+fi
 # format and print unique lines...
 lines=()
 {
