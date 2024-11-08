@@ -93,7 +93,8 @@ lines=()
 			| sed -n '/\[remote "origin"\]/,/^\s*url/p' \
 			| grep 'url = ' \
 			| sed \
-				-e 's/\s*url\s*=\s*//')
+				-e 's/\s*url\s*=\s*//' \
+				-e 's/.git\s*$//')
 		[ -z $remote ] \
 			&& continue
 		line="$path=$remote"
@@ -103,7 +104,9 @@ lines=()
 	if [ -e "$LIST" ] ; then
 		cat "$LIST" \
 			| grep -ve '\(^\s*#\|^\s*$\)' \
-			| sed -e 's/^-//'
+			| sed \
+				-e 's/^-//' \
+				-e 's/.git\s*$//'
 	fi
 } \
 	| sort \
