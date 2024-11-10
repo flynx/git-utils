@@ -12,7 +12,7 @@ Provided commands:
   Pull changes for all repositories in tree
 
 
-These enable setting up and maintaining mutiple development machines with
+These enable setting up and maintaining multiple development machines with
 a number of git repositories.
 
 
@@ -23,7 +23,7 @@ In a tree with multiple git repositories:
   ```shell
   $ git pullall -r
   ```
-- to create the same env on a different computer:
+- to create the same environment on a different computer:
   ```shell
   $ git listall -r > repos.lst
   ```
@@ -31,6 +31,8 @@ In a tree with multiple git repositories:
   ```shell
   $ git cloneall repos.lst
   ```
+  Note that `git cloneall` will only clone repos that are not already 
+  cloned, thus it is safe to call on an existing tree.
 - to update the repository list with new repos:
   ```shell
   $ git listall -r repos.lst >> repos.lst
@@ -38,8 +40,8 @@ In a tree with multiple git repositories:
 
 
 ## Tips
-- It is convenient to manage `repos.lst` as symlinks to a unified directory and
-  syncronize it between machines via someting like [syncthing](https://syncthing.net/)
+- It is convenient to manage `repos.lst` as a symlink to a unified directory and
+  synchronize it between machines via something like [Syncthing](https://syncthing.net/)
 
 
 ## License
