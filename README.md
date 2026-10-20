@@ -10,6 +10,8 @@ Provided commands:
   Clone all repositories in file
 - `git pullall`  
   Pull changes for all repositories in tree
+  If `.pullall-skip` file exists in the repository root, `git-pullall`
+  will skip pulling it
 
 
 These enable setting up and maintaining multiple development machines with
