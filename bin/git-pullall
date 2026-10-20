@@ -56,6 +56,11 @@ wd=$(pwd)
 for dir in "${DIRS[@]}" ; do
 	dir="${dir%.git}"
 	echo "$dir"
+	if [ -e "$dir/.pullall-skip" ] ; then
+		echo "skipping..."
+		echo
+		continue
+	fi
 	cd "$dir"
 	git pull
 	cd "$wd"
