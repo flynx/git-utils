@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+
+SKIP_FILE=${SKIP_FILE:-.pullall-skip}
+
+
 while true ; do
 	case $1 in
 		-h|--help)
@@ -10,6 +14,13 @@ while true ; do
 			echo "Options:"
 			echo "    -h --help       - print this message and exit"
 			echo "    -r --recursive  - pull directories recursively"
+			if ! [ -z $SKIP_FILE ] ; then
+				echo
+				echo "If $SKIP_FILE is present in the repository root directry"
+				echo "the repository will not get pulled."
+				#echo "To disable this behavior set \$SKIP_FILE to empty, e.g:"
+				#echo "    SKIP_FILE= git pullall -r"
+			fi
 			echo
 			exit
 			;;
@@ -56,7 +67,8 @@ wd=$(pwd)
 for dir in "${DIRS[@]}" ; do
 	dir="${dir%.git}"
 	echo "$dir"
-	if [ -e "$dir/.pullall-skip" ] ; then
+	if ! [ -z $SKIP_FILE ] \
+			&& [ -e "$dir/$SKIP_FILE" ] ; then
 		echo "skipping..."
 		echo
 		continue
